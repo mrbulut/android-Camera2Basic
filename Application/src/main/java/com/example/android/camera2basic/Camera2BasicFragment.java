@@ -51,6 +51,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Size;
+import android.util.SizeF;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -584,6 +585,44 @@ public class Camera2BasicFragment extends Fragment
                 mFlashSupported = available == null ? false : available;
 
                 mCameraId = cameraId;
+
+
+                String cameraID = cameraId;
+
+
+                if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT)
+                    continue;
+
+                int support = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+                if( support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
+                    Log.d("Result", "Camera " + cameraID + " has LEGACY Camera2 support");
+                else if( support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
+                    Log.d("Result", "Camera " + cameraID + " has LIMITED Camera2 support");
+                else if( support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
+                    Log.d("Result", "Camera " + cameraID + " has FULL Camera2 support");
+                else
+                    Log.d("Result", "Camera " + cameraID + " has unknown Camera2 support?!");
+
+                SizeF sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+                float[] focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+
+
+                float w = 0.5f * sensorSize.getWidth();
+                float h = 0.5f * sensorSize.getHeight();
+                Log.d("Result", "Camera " + cameraID + " has sensorSize == " + Float.toString(2.0f*w) + ", " + Float.toString(2.0f*h));
+                for (int focusId=0; focusId<focalLengths.length; focusId++) {
+                    float focalLength = focalLengths[focusId];
+                    float horizonalAngle = (float) Math.toDegrees(2 * Math.atan(w / focalLength));
+                    float verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
+                    Log.d("Result", "Camera " + cameraID + "/f" + focusId + " has focalLength == " + Float.toString(focalLength));
+                    Log.d("Result", "  * horizonalAngle == " + Float.toString(horizonalAngle));
+                    Log.d("Result", "  * verticalAngle == " + Float.toString(verticalAngle));
+                }
+
+
+
+
+
                 return;
             }
         } catch (CameraAccessException e) {
